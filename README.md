@@ -1,6 +1,6 @@
 # PCPC
 Repo para el proyecto de Laboratorio 4 (2025). La aplicación recopilará precios de notebooks de diferentes página y las mostrará
-en una página que además permitira encontrar la mejor PC para los requerimientos del usuario.
+en una página que además permitira encontrar la mejor PC para los requerimientos del usuario. 
 
 ## Requisitos
 
