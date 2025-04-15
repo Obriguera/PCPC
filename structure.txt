@@ -1,0 +1,18 @@
+PCPC/  
+├── app/  
+│   ├── main.py          # Entry point (FastAPI)  
+│   ├── routes/          # API endpoints  
+│   ├── services/        # Business logic (NLP, query processing)  
+│   ├── models/          # Pydantic models for data validation  
+│   ├── database/        # DB connection and ORM models  
+├── tests/               # Unit tests  
+├── requirements.txt     # Python dependencies  
+├── web/                 # React, Vue, or any frontend framework  
+├── assets/              # Static files (images, CSS, etc.)  
+│── database/         # Database-related files  
+│   ├── migrations/          # DB schema migrations  
+│   ├── seed/                # Initial data population  
+│   ├── docker/              # Database Docker setup (PostgreSQL, MySQL, etc.)  
+│── .gitignore  
+│── README.md  
+│── docker-compose.yml  # Optional: Setup for backend, database, etc. 
