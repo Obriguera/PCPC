@@ -2,6 +2,10 @@
 Repo para el proyecto de Laboratorio 4 (2025). La aplicación recopilará precios de notebooks de diferentes página y las mostrará
 en una página que además permitira encontrar la mejor PC para los requerimientos del usuario. 
 
+# IDEAS
+-Permitir cargar un presupuesto para que la IA lo tenga en cuenta
+-Si llegamos a tener en cuenta componentes y no solamente Notebooks, ver que los componentes sean compatibles entre sí a la hora de armar una computadora
+
 ## Requisitos
 
 * Python 3.12.X  
