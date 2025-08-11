@@ -35,3 +35,21 @@ en una página que además permitira encontrar la mejor PC para los requerimient
    ```
 
 3. Open your browser and go to `http://127.0.0.1:8000/` to see `{"message": "Hello, World!"}`.
+
+
+# PCPC
+Repositorio para el proyecto de Laboratorio 4 (2025). La aplicación recopila precios de notebooks de diferentes páginas, los almacena en una base de datos MongoDB y utiliza una IA (Gemini) para recomendar la mejor opción al usuario según sus necesidades.
+
+# Ideas Implementadas
+- **Base de Datos Centralizada**: Los datos de los scrapers se guardan en una base de datos MongoDB.
+- **Búsqueda con IA**: Un endpoint permite a un usuario describir sus necesidades y presupuesto, y la IA de Google (Gemini) analiza los productos en la base de datos para ofrecer una recomendación inteligente.
+
+## Requisitos
+* Python 3.12.X
+* MongoDB instalado y corriendo localmente.
+
+## Instalación
+1. Clona el repositorio y crea un entorno virtual:
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate

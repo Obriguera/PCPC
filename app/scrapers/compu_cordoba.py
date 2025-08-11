@@ -7,18 +7,20 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 import time
 
+
+
 def get_driver():
     options = Options()
-    options.add_argument("--headless")        # Ejecutar en segundo plano
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1920,1080")
-    # Si necesitás forzar la ruta de Chrome:
-    # options.binary_location = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-    return webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+    
+    # Le decimos a Selenium que use el archivo .exe de la carpeta del proyecto
+    service = Service(executable_path="chromedriver.exe")
+    
+    return webdriver.Chrome(service=service, options=options)
+
 
 def scrape_compu_cordoba():
     """Scrapea notebooks de compucordoba.com.ar/notebooks"""

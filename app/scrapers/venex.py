@@ -29,7 +29,11 @@ def get_driver():
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--window-size=1920,1080")
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    
+    # Le decimos a Selenium que use el archivo .exe de la carpeta del proyecto
+    service = Service(executable_path="chromedriver.exe")
+    
+    return webdriver.Chrome(service=service, options=options)
 
 def extract_json_from_onclick(onclick_attr):
     # Extrae JSON de: onclick="enhancedClick({...})"
