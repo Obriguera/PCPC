@@ -29,15 +29,12 @@ except ConnectionFailure as e:
     print(f"ERROR CRÍTICO: No se pudo conectar a MongoDB. {e}")
 
 # --- Configuración de Gemini ---
-# Carga la clave de forma segura desde las variables de entorno
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
-    # Si la clave no se encuentra, la aplicación no podrá iniciar.
-    # Esto es mejor que fallar en medio de una petición.
     raise ValueError("No se encontró la variable de entorno GOOGLE_API_KEY. Asegúrate de crear el archivo .env y definirla.")
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 # --- Modelos Pydantic ---
 class Producto(BaseModel):
@@ -58,7 +55,8 @@ class SearchResponse(BaseModel):
 @app.get("/productos", response_model=List[Producto])
 def listar_productos():
     """Devuelve todos los productos de la base de datos."""
-    if not productos_collection:
+    # ✅ LÍNEA CORREGIDA AQUÍ
+    if productos_collection is None:
         raise HTTPException(status_code=503, detail="Servicio no disponible (DB)")
 
     try:
@@ -73,7 +71,8 @@ def buscar_con_ia(request: SearchRequest):
     Recibe las necesidades y presupuesto del usuario, consulta la DB
     y usa una IA para recomendar la mejor notebook.
     """
-    if not productos_collection:
+    # ✅ LÍNEA CORREGIDA AQUÍ
+    if productos_collection is None:
         raise HTTPException(status_code=503, detail="Servicio no disponible (DB)")
 
     # 1. Obtener todos los productos de la base de datos
@@ -110,14 +109,12 @@ def buscar_con_ia(request: SearchRequest):
         print("Enviando prompt a Gemini...")
         response = model.generate_content(prompt)
         
-        # Limpiar y parsear la respuesta JSON de la IA
         ia_json_str = response.text.strip().replace("`", "").replace("json", "")
         ia_data = json.loads(ia_json_str)
 
         razonamiento = ia_data.get("razonamiento", "La IA no proporcionó una razón.")
         nombre_elegido = ia_data.get("nombre_producto")
-
-        # 4. Buscar el producto recomendado en nuestra lista para devolverlo completo
+        
         producto_elegido = next((p for p in lista_productos if p.get('nombre') == nombre_elegido), None)
 
         return SearchResponse(
