@@ -1,6 +1,8 @@
 import os
 import json
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import HTMLResponse
 from pydantic import BaseModel
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -13,7 +15,13 @@ load_dotenv()
 
 app = FastAPI()
 
-# --- Configuración de MongoDB ---
+# --- Servir Archivos Estáticos ---
+# Monta la carpeta 'web' para que FastAPI pueda servir el CSS y JS.
+# Se asume que ejecutas 'uvicorn' desde la carpeta raíz 'PCPC/'.
+app.mount("/static", StaticFiles(directory="web"), name="static")
+
+
+# --- Configuración de la Base de Datos ---
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "scrapers_db"
 COLLECTION_NAME = "productos"
@@ -28,15 +36,18 @@ try:
 except ConnectionFailure as e:
     print(f"ERROR CRÍTICO: No se pudo conectar a MongoDB. {e}")
 
-# --- Configuración de Gemini ---
+
+# --- Configuración de la IA de Gemini ---
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
-    raise ValueError("No se encontró la variable de entorno GOOGLE_API_KEY. Asegúrate de crear el archivo .env y definirla.")
+    raise ValueError("No se encontró la variable GOOGLE_API_KEY en el archivo .env")
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-2.0-flash')
+# Usamos el modelo más reciente para mejor rendimiento y disponibilidad
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
-# --- Modelos Pydantic ---
+
+# --- Modelos de Datos (Pydantic) ---
 class Producto(BaseModel):
     nombre: str
     precio: str
@@ -50,40 +61,39 @@ class SearchResponse(BaseModel):
     recomendacion: str
     producto_sugerido: Optional[Producto] = None
 
-# --- Endpoints de la API ---
+
+# --- Endpoints de la Aplicación ---
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    """Sirve el archivo principal index.html cuando se accede a la raíz."""
+    with open("web/index.html") as f:
+        return HTMLResponse(content=f.read(), status_code=200)
 
 @app.get("/productos", response_model=List[Producto])
 def listar_productos():
     """Devuelve todos los productos de la base de datos."""
-    # ✅ LÍNEA CORREGIDA AQUÍ
     if productos_collection is None:
-        raise HTTPException(status_code=503, detail="Servicio no disponible (DB)")
-
+        raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
+    
     try:
-        productos_db = list(productos_collection.find({}, {"_id": 0}))
-        return productos_db
+        return list(productos_collection.find({}, {"_id": 0}))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al leer de la base de datos: {e}")
 
 @app.post("/search", response_model=SearchResponse)
 def buscar_con_ia(request: SearchRequest):
-    """
-    Recibe las necesidades y presupuesto del usuario, consulta la DB
-    y usa una IA para recomendar la mejor notebook.
-    """
-    # ✅ LÍNEA CORREGIDA AQUÍ
+    """Recibe las necesidades del usuario y devuelve una recomendación de la IA."""
     if productos_collection is None:
-        raise HTTPException(status_code=503, detail="Servicio no disponible (DB)")
+        raise HTTPException(status_code=503, detail="Servicio de base de datos no disponible")
 
-    # 1. Obtener todos los productos de la base de datos
     try:
         lista_productos = list(productos_collection.find({}, {"_id": 0}))
         if not lista_productos:
-            return SearchResponse(recomendacion="No se encontraron notebooks en la base de datos para analizar.", producto_sugerido=None)
+            return SearchResponse(recomendacion="No se encontraron notebooks en la base de datos.", producto_sugerido=None)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al consultar la base de datos: {e}")
 
-    # 2. Construir el prompt para la IA
     prompt = f"""
     Eres un experto en hardware de computadoras que ayuda a usuarios a elegir la mejor notebook.
     Analiza la siguiente lista de productos disponibles y elige la MEJOR opción para un usuario según sus necesidades y presupuesto.
@@ -92,10 +102,10 @@ def buscar_con_ia(request: SearchRequest):
     **Presupuesto máximo:** ${request.presupuesto_max if request.presupuesto_max else "No especificado"}
 
     **Instrucciones:**
-    1. Revisa CUIDADOSAMENTE cada producto de la lista. Considera que el precio está en pesos argentinos.
-    2. Considera el nombre del producto para inferir sus componentes (CPU, RAM, almacenamiento, etc.).
+    1. Revisa CUIDADOSAMENTE cada producto. El precio está en pesos argentinos.
+    2. Infiere los componentes del producto a partir de su nombre.
     3. Elige solo UN producto, el que consideres la mejor opción.
-    4. Tu respuesta DEBE ser un objeto JSON válido con dos claves: "razonamiento" (una explicación breve y amigable de por qué elegiste ese producto) y "nombre_producto" (el nombre exacto del producto que seleccionaste de la lista).
+    4. Tu respuesta DEBE ser un objeto JSON válido con dos claves: "razonamiento" (una explicación breve y amigable) y "nombre_producto" (el nombre exacto del producto que seleccionaste).
     5. No incluyas nada más en tu respuesta, solo el JSON.
 
     **Lista de productos disponibles:**
@@ -104,7 +114,6 @@ def buscar_con_ia(request: SearchRequest):
     **Tu respuesta (solo el objeto JSON):**
     """
 
-    # 3. Llamar a la IA de Gemini
     try:
         print("Enviando prompt a Gemini...")
         response = model.generate_content(prompt)
@@ -121,7 +130,6 @@ def buscar_con_ia(request: SearchRequest):
             recomendacion=razonamiento,
             producto_sugerido=Producto(**producto_elegido) if producto_elegido else None
         )
-
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="Error: La IA no devolvió un JSON válido.")
     except Exception as e:
