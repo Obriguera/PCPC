@@ -1,0 +1,57 @@
+services:
+  # === BACKEND FASTAPI ===
+  fastapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pcpc-backend-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - RUNNING_IN_DOCKER=1
+      - MONGO_URI=mongodb://mongo:27017/scrapers_db   # unificado con runner
+    volumes:
+      - ./backend:/code
+    depends_on:
+      - mongo
+
+  # === RUNNER ===
+  runner:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pcpc-runner
+    depends_on:
+      - fastapi
+      - mongo
+    command: ["python", "runner.py"]
+    environment:
+      - RUNNING_IN_DOCKER=1
+      - MONGO_URI=mongodb://mongo:27017/scrapers_db   # unificado con fastapi
+      - API_URL=http://fastapi:8000/productos         # agregado
+    volumes:
+      - ./backend:/code
+
+  # === FRONTEND ===
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: pcpc-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/code
+
+  # === MONGODB ===
+  mongo:
+    image: mongo:6.0
+    container_name: pcpc-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+# === VOLUMES ===
+volumes:
+  mongo_data:

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"> 
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCPC - Asistente de Notebooks</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/script.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <h1>PCPC 🤖 Asistente de Notebooks</h1>
+    </header>
+
+    <main>
+        <section class="ai-section">
+            <h2>Busca tu Notebook Ideal</h2>
+            <form id="ai-form">
+                <label for="necesidades">¿Para qué la necesitas?</label>
+                <textarea id="necesidades" name="necesidades" rows="4" placeholder="Ej: Soy programador, la necesito para compilar código, virtualizar y jugar ocasionalmente..." required></textarea>
+                
+                <label for="presupuesto">Presupuesto Máximo (ARS)</label>
+                <input type="number" id="presupuesto" name="presupuesto" placeholder="Ej: 1500000">
+                
+                <button type="submit" id="submit-button">Buscar Recomendación</button>
+            </form>
+            <div id="ai-response-container" class="response-container">
+                </div>
+        </section>
+
+        <section class="notebook-list-section">
+            <h2>Notebooks en la Base de Datos</h2>
+            <button id="load-notebooks-btn">Cargar Notebooks</button>
+            <div id="notebook-list" class="grid-container">
+                </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Proyecto PCPC - 2025</p>
+    </footer>
+
+</body>
+</html>
