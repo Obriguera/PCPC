@@ -1,13 +1,11 @@
-FROM nginx:alpine
+# Usamos Nginx para servir archivos estáticos
+FROM nginx:stable-alpine
 
-# Limpiar contenido por defecto de Nginx
-RUN rm -rf /usr/share/nginx/html/*
+# Directorio donde Nginx sirve los archivos
+WORKDIR /usr/share/nginx/html
 
-# Copiar todos los archivos del frontend
-COPY . /usr/share/nginx/html
+# Copiamos todo el contenido del frontend al contenedor
+COPY . .
 
-# Exponer puerto 80
+# Exponemos el puerto 80
 EXPOSE 80
-
-# Arrancar Nginx
-CMD ["nginx", "-g", "daemon off;"]

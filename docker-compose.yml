@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     environment:
       - RUNNING_IN_DOCKER=1
-      - MONGO_URI=mongodb://mongo:27017/scrapers_db   # unificado con runner
+      - MONGO_URI=mongodb://mongo:27017/scrapers_db
     volumes:
       - ./backend:/code
     depends_on:
@@ -27,21 +27,21 @@ services:
     command: ["python", "runner.py"]
     environment:
       - RUNNING_IN_DOCKER=1
-      - MONGO_URI=mongodb://mongo:27017/scrapers_db   # unificado con fastapi
-      - API_URL=http://fastapi:8000/productos         # agregado
+      - MONGO_URI=mongodb://mongo:27017/scrapers_db
+      - API_URL=http://fastapi:8000/productos
     volumes:
       - ./backend:/code
 
   # === FRONTEND ===
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: pcpc-frontend
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - ./frontend:/code
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pcpc-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - fastapi
 
   # === MONGODB ===
   mongo:
@@ -52,6 +52,5 @@ services:
     volumes:
       - mongo_data:/data/db
 
-# === VOLUMES ===
 volumes:
   mongo_data:

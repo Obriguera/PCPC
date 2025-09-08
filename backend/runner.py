@@ -44,14 +44,22 @@ def enviar(productos, fuente):
     """Envía los productos a la API de FastAPI."""
     for p in productos:
         try:
+            # Eliminar el _id si existe (para evitar el error de ObjectId no serializable)
+            if "_id" in p:
+                del p["_id"]
+
             nombre = p.get('nombre', 'Producto sin nombre')
             resp = requests.post(API_URL, json=p)
             print(f"[{fuente}] ➡️ Enviado {nombre} - {resp.status_code}")
         except Exception as e:
             print(f"[{fuente}] ❌ Error enviando {nombre}:", e)
 
+
 if __name__ == "__main__":
     productos_collection = get_db_collection()
+
+    if productos_collection is None:
+        print("⚠️ No se pudo obtener la colección de MongoDB. Se continuará solo enviando datos a FastAPI.")
 
     scrapers = [
         ("compu_cordoba", scrape_compu_cordoba),
@@ -64,8 +72,8 @@ if __name__ == "__main__":
             resultados = funcion()
             print(f"   {len(resultados)} resultados de {nombre}")
 
-            # --- Guardar en MongoDB ---
-            if productos_collection:
+            # --- Guardar en MongoDB (solo si la colección está disponible) ---
+            if productos_collection is not None:
                 almacenar(resultados, nombre, productos_collection)
 
             # --- Enviar a FastAPI ---
