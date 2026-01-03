@@ -1,22 +1,3 @@
-# PCPC
-Repositorio para el proyecto de Laboratorio 4 (2025). La aplicación recopila precios de notebooks de diferentes páginas, los almacena en una base de datos MongoDB y utiliza una IA (Gemini) para recomendar la mejor opción al usuario según sus necesidades.
-
-# Ideas Implementadas
-- **Base de Datos Centralizada**: Los datos de los scrapers se guardan en una base de datos MongoDB.
-- **Búsqueda con IA**: Un endpoint permite a un usuario describir sus necesidades y presupuesto, y la IA de Google (Gemini) analiza los productos en la base de datos para ofrecer una recomendación inteligente.
-
-## Requisitos
-* Python 3.12.X
-* MongoDB instalado y corriendo localmente.
-
-## Instalación
-1. Clona el repositorio y crea un entorno virtual:
-   ```bash
-   python -m venv venv
-   .\venv\Scripts\activate
-
-
-
 # PCPC - Comparador Inteligente de Notebooks
 PCPC es un proyecto desarrollado para la cátedra de Laboratorio 4 (2025). La aplicación web está diseñada para centralizar precios de notebooks de diversos sitios de e-commerce, permitiendo a los usuarios encontrar la opción que mejor se adapte a sus necesidades y presupuesto mediante el uso de Inteligencia Artificial.
 
